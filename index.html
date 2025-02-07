@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Rain of Pain: The Blockman Sagas</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="animations.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Iceberg&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+     
+    <div id="raingame">
+        <div id="agreement">
+            <h2>Game Agreement</h2>
+            <p>By clicking "Agree," you understand that this game is copyright protected.</p>
+            <button id="agreeButton">Agree</button>
+        </div>
+        <div id="welcome" class="overlay">
+            <h2>Welcome!</h2>
+            <div id="welcome-difficulty">
+                <label for="difficulty">Select Difficulty:</label>
+                <select id="difficulty">
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+            </div>
+            <div id="welcome-model-select" style="border: solid; border-color: rgba(rgb(0, 0, 216,1)); z-index: 999999;">
+                <p>Select your character:</p>
+                <div id="model-layout">
+                    <div class="character" onclick="selectCharacter('blocky')"><img src="imgs/blocky-model.gif" width="55" height="55" alt="Blocky"></div>
+                    <div class="character" onclick="selectCharacter('r2d2')"><img src="imgs/r2d2-model.gif" width="55" height="55" alt="R2-D2"></div>
+                    <div class="character" onclick="selectCharacter('mickey')"><img src="imgs/mickey-model.gif" width="65" height="65" alt="Mickey"></div>
+                </div>
+            </div>
+            <div id="welcome-settings" style="border: solid; border-color: rgba(rgb(0, 0, 216))">
+                <p>Game Settings</p>
+                <div id="game-settings">
+                    <div class="setting-container">
+                        <div id="music-toggle" class="toggle-container" onclick="toggleMusic()">
+                            <div class="toggle-circle"></div>
+                        </div>
+                        <p class="setting-label" id="music-status">Music OFF</p>
+                    </div>
+                    <div class="setting-container">
+                        <div id="debug-toggle" class="toggle-container" onclick="toggleDebug()">
+                            <div class="toggle-circle"></div>
+                        </div>
+                        <p class="setting-label" id="debug-status">Debug OFF</p>
+                    </div>
+                    <div class="setting-container">
+                        <div id="eric-toggle" class="toggle-container" onclick="toggleEricMode()">
+                            <div class="toggle-circle"></div>
+                        </div>
+                        <p class="setting-label" id="eric-status">Eaz Mode OFF</p>
+                    </div>
+                </div>
+            </div>
+            <button id="startButton" disabled>Start Game</button>
+        </div> 
+        <div id="electric-border">       
+            <div id="game-container">
+                <div id="nameInputModal" class="game-overlay" style="display: none;">
+                    <h3>New High Score!</h3>
+                    <div id="high-name-entry">
+                        <div style="justify-content: left; width: 150px;">Enter your name:</div>
+                        <div style="flex:1;"><input type="text"  style="z-index: 9999; width: 100%;" id="playerNameInput" placeholder="Your Name" autocomplete="off"></div>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: center; width: 100%;">
+                        <button id="submitName" style="position: relative; z-index: 9999;">OK</button>
+                    </div>
+                </div>
+                <canvas id="firework-canvas" width="500" height="700"></canvas>
+                <canvas id="collision-canvas" style="display: none;"></canvas>
+                <div id="UI-header">
+                    <div class="health-tracker" id="health-tracker">
+                        <div class="health-bar">
+                            <div class="health-fill" id="health-fill"></div>
+                        </div>
+                        <p>Health</p>
+                    </div>
+                    <div class="rocket-tracker" id="rocket-tracker">
+                        <div class="rocket-bar">
+                            <div class="rocket-fill" id="rocket-fill"></div>
+                        </div>
+                        <p>Boost Juice</p>
+                    </div>
+                </div>
+                <div id="red-overlay"></div>
+                <div id="spotlight"></div>
+                <div id="countdown"></div>
+                <div id="player-wrapper"><img id="player" class="player" src="imgs/blocky.png" alt="Player"></div>
+                <div class="overlay" id="game-title" style="text-align: center;">    
+                    <div id="begintext" style="border-radius: 5px;"> PRESS ENTER TO BEGIN </div>
+                </div>
+                <div id="test-overlay" style="text-align: center;">    
+                    <div class=""game-overlay-header" id="test-header">
+                        <div class="overlay-close" style="width:5%">❌</div>
+                        <div class="overlay-title" style="width:95%">Test Overlay! XXXXX</div>
+                    </div>
+                    <div id="test-content" class="overlay-content">
+                        <div id="test-content-controls">
+                            <div id="test-content-controls1" style="margin-top: 10px; display: flex; flex-direction: row;">
+                                <div style="position: relative; width: 45%";>⬅️➡️: Move side to side</div>
+                                <div style="position: relative; width: 45%";>⬆️: Boost / Jetpack</div>
+                            </div>
+                            <div id="test-content-controls2" style="margin-top: 10px; display: flex; flex-direction: row;">
+                                <div style="position: relative; width: 45%">🇪: Fire Laser</div>
+                                <div style="position: relative; width: 45%">Space: Pause</div>
+                            </div>
+                        </div>
+                        <h3>Objective</h3>
+                        <ul>
+                        <li>Avoid falling hazards!</li>
+                        <img src="imgs/fallingObject1.png" alt="Object 1" style="width: 35px; height: auto;"> <img src="imgs/fallingObject2.png" alt="Object 2" style="width: 35px; height: auto;"> <img src="imgs/fallingObject3.png" alt="Object 3" style="width: 35px; height: auto;">
+                        <li>Collect the items you need (food, fuel, supplies) without getting hit by falling hazards.</li>
+                        <img src="imgs/crate-fuel.png" alt="Fuel" style="width: 35px; height: auto;"> <img src="imgs/crate-food.png" alt="Food" style="width: 35px; height: auto;"> <img src="imgs/crate-supplies.png" alt="Supplies" style="width: 35px; height: auto;">
+                        <li>Collecting items in a combo (collect 1 each before getting a 2nd of any) increases score.</li>
+                        <li>Preventing all resource items from falling the ground produces a perfect catch score streak.</li>
+                        <li>Overcollection of resources produces a negative score effect. Watch your resource meters!</li>
+                        <li>Watch out for spotlight bombs!</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="game-overlay" id="game-instructions" style="text-align: center;">    
+                    <h3>Instructions</h3>
+                    <p>⬅️➡️: Move side to side</p>
+                    <p>⬆️: Boost / Jetpack</p>
+                    <p>🇪: Fire Laser</p>
+                    <p>Spacebar: Pause</p>
+                    <h3>Objective</h3>
+                    <ul>
+                    <li>Avoid falling hazards!</li>
+                    <li>Collect the items you need (food, fuel, supplies) without getting hit by falling hazards.</li>
+                    <li>Collecting items in a combo (collect 1 each before getting a 2nd of any) increases score.</li>
+                    <li>Preventing all resource items from falling the ground produces a perfect catch score streak.</li>
+                    <li>Overcollection of resources produces a negative score effect. Watch your resource meters!</li>
+                    </ul>
+                </div>
+                <div class="game-overlay" id="game-mission" style="text-align: center;">    
+                    <h3>Welcome to Blockonia Prime</h3>
+                    <p>The year is 2312.</p>
+                    <p></p>
+                    <p>After years of strife, the evil villain Sphericull has decided to finally rid himself of all those his twisted mind deems unworthy.</p>
+                    <p></p>
+                    <p>In the previous installment of our saga, Sphericull successfully infected Blockonia Prime's star, Cartonus, with a destrucive chemical known as Photovorium. 
+                    While our scientists work day and night to try to solve the mystery and stop it’s
+                    devestating effects, it is up to Blockman to prepare his people to flee Blockonia Prime in order to ensure their survival.</p>
+                    <p></p>
+                    <p>Now Blockman has requested an AI upgrade to help him. As the last untested AI model, you will be loaded
+                        onto Blockman's neural combinizer to join the fight.</p>
+                    <p>Who knows what evil awaits you?</p>
+                    <p></p>
+                    <p><span class="critical-text">Stop Sphericull and help Blockman save the Boxians!</span></p>
+                    <h4>Blockspeed, my friend!</h4>
+                </div>
+                <div class="game-overlay" id="leader-board" style="text-align: center;">    
+                    <h3>Leaderboard</h3>
+                    <div id="lboard-scores"></div>
+                    <button id="reset-scores" style="z-index: 9999;position: relative; margin-top: 20px;">Reset Scores</button>
+                    <h4>Congrats to our leaders!</h4>
+                </div>
+                <div class="game-overlay" id="game-about" style="text-align: center;">    
+                    <h3>Rain of Pain: The Blockman Sagas</h3>
+                    <p>This game, including all assets and code, is licensed under:</p>
+                    <ul>    
+                    <li>Creative Commons Attribution-NonCommercial 4.0 International License for the visuals, sounds, and story.</li>
+                    <li>MIT License for the source code.</li>
+                    </ul>
+                    <p>You are free to use and modify this game for personal and educational purposes. For any commercial use, please contact blockman@blocktastic.com.</p>
+                    <p>Additionally, the author would like to thank:</p>
+                    <ul>
+                        <li>OpenAI</li>
+                        <li>SoundBible.com</li>
+                        <li>You!</li>
+                    </ul>
+                    <p>Any rights not covered here are reserved for future use by the author.</p>
+                    <p>© Mike Olson, 2024</p>
+                    <h4>Version: <span id="game-version">0.06.02</span></h4>
+                </div>
+                <div class="overlay" id="game-paused" style="text-align: center; padding-top: 300px;">    
+                    Game Paused!
+                    <button id="unpause" style="display: block; margin: 20px auto; padding: 10px 20px; font-size: 16px;">Unpause</button>
+                </div>
+                <div class="overlay" id="game-over" style="text-align: center; padding-top: 300px;">    
+                    <span id=gameOverReason>Game Over!</span>
+                    <button id="restart" style="display: block; margin: 20px auto; padding: 10px 20px; font-size: 16px;">Restart</button>
+                </div>
+            </div>
+        </div>
+        <div id="sidebar">
+            <div id="ui-buttons" class="sidebar-section">
+                <div class="cover"></div>
+                <div class="content">
+                    <button id="instructions">Show Instructions</button>
+                    <button id="missionSummary">Mission Summary</button>
+                    <button id="leaderBoard">Leader Board</button>
+                    <button id="aboutGame">About Game</button>
+                </div>
+            </div>
+            <div id="score" class="sidebar-section">
+                <div class="cover"></div>
+                <div class="content">
+                    <div class="sidebar-header"><p>Score:</p></div>
+                    <div id="scoreboard">
+                        <table width="100%" bgcolor="black">
+                            <tr>
+                                <td><p>Current<br>Score</p></td>
+                                <td><p id="currentscore" style="font-size: 16px;"><span id="cScoreText">0</span></p></td>
+                            </tr>
+                            <tr>
+                                <td><p>High<br>Score</p></td>
+                                <td><p id="currentscore" style="font-size: 16px;"><span id="hScoreText">0</span></p></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div id="timer-section" class="sidebar-section">
+                <div class="cover"></div>
+                <div class="content">
+                    <div id="time-left-header">Time Taken:</div>
+                    <div id="timer"><span id="timer-text">0:00</span></div>
+                    <div id="combo-header">Combo Tracker</div>
+                    <div id="combotracker">
+                        <span class="combo-text" id="combo-text-fuel">FUEL</span> <span class="combo-text" id="combo-text-food">FOOD</span> <span class="combo-text" id="combo-text-supplies">SUPPLIES</span>
+                    </div>
+                </div>
+            </div>
+            <div id="resources" class="sidebar-section">
+                <div class="cover"></div>
+                <div class="content">
+                    <div class="resource-tracker" id="fuel-tracker">
+                        <p>Fuel</p>
+                        <div class="resource-bar">
+                            <div class="resource-fill" id="fuel-fill"></div>
+                        </div>
+                    </div>
+                
+                    <div class="resource-tracker" id="food-tracker">
+                        <p>Food</p>
+                        <div class="resource-bar">
+                            <div class="resource-fill" id="food-fill"></div>
+                        </div>
+                    </div>
+                
+                    <div class="resource-tracker" id="supplies-tracker">
+                        <p>Supplies</p>
+                        <div class="resource-bar">
+                            <div class="resource-fill" id="supplies-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="status-area" class="sidebar-section">
+                <div class="cover"></div>
+                <div class="content">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="audio.js"></script> 
+    <script src="boost.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

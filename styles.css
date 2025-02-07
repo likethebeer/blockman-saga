@@ -1,0 +1,1122 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Iceberg", sans-serif;
+    background-color: rgb(32, 0, 36);
+}
+
+/* #raingame maintains Flexbox and positioning */
+#raingame {
+    display: flex;  /* Still a Flex container */
+    align-items: flex-start;  /* Top-align content */
+    justify-content: center;  /* Center horizontally */
+    height: 700px;  /* Fixed game height */
+    width: 650px;  /* Full width */
+    position: relative;  /* Enables absolute child positioning */
+    overflow: hidden;  /* Prevent scrollbars */
+}
+
+#firework-canvas {
+    position: absolute; /* Floats the canvas inside the container */
+    top: 0;
+    left: 0;
+    z-index: 5500;
+    pointer-events: none; /* Allows clicks to pass through to underlying elements */
+  }
+
+#agreement {
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    width: 90%;
+    height: 90%;
+    padding: 20px;
+    background: linear-gradient(135deg, #6f00ff, #ff007d);
+    color: white;
+    font-family: "Silkscreen", sans-serif;
+    border: 5px solid #00ffff;
+    border-radius: 10px;
+    box-shadow: 0 0 20px #00ffff, 0 0 40px #ff007d;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    text-align: center;
+}
+
+#agreement h2 {
+    font-size: 24px;
+    text-shadow: 0 0 10px #00ffff, 0 0 20px #ff007d;
+    padding: 4px 24px;
+}
+
+#agreement p {
+    font-size: 14px;
+    margin: 10px 0;
+}
+
+#agreeButton {
+    background: #00ffff;
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 0 10px #ff007d, 0 0 20px #6f00ff;
+    transition: all 0.3s ease;
+}
+
+#agreeButton:hover {
+    background: #ff007d;
+    color: #fff;
+    box-shadow: 0 0 20px #00ffff, 0 0 40px #6f00ff;
+}
+
+#game-title {
+    background-image: url('imgs/title03.png'); /* Replace with your image path */
+    background-size: cover; /* Ensure the image fills the element */
+    background-position: center bottom; /* Center the image */
+    background-repeat: no-repeat; /* Prevent tiling */
+}
+
+#game-container {
+    width: 100%;
+    height: 100%;
+    border: 2px solid black;
+    position: relative;
+    overflow: hidden;
+    background-color: lightblue;
+    border: #000000;
+    border-width: 5px;
+    border-style:ridge;
+}
+
+#game-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('imgs/background02.jpg'); /* Background image */
+    background-size: cover; /* Ensure the image covers the whole container */
+    background-position: center; /* Center the image */
+    background-repeat: no-repeat; /* Prevent tiling */
+    filter: brightness(70%) opacity(80%); /* Apply the filter only to the background */
+    z-index: 0; /* Ensure it’s below game elements */
+    pointer-events: none; /* Ensure it doesn’t interfere with interactions */
+}
+
+#electric-border {
+    top: 0;
+    left: 0;
+    width: 500px; /* Match parent dimensions */
+    height: 100%; /* Match parent dimensions */
+    z-index: 0; /* Ensure it's on top of game content */
+    box-sizing: border-box; /* Include border in the size */
+}
+
+/* Active electric wave effect */
+#electric-border.active {
+    animation: electric-wave 2s linear infinite; /* Animation duration */
+    border-width: 5px; /* Thickness of the wave */
+    border-style: solid;
+    border-image-source: linear-gradient(90deg, transparent, blue, transparent);
+    border-image-slice: 1; /* Necessary for gradient borders */
+}
+
+
+
+
+
+#player {
+    position: absolute;
+    width: auto; /* Let the image scale to fit the container */
+    height: 65px; /* Maintain the aspect ratio */
+    left: 225px;
+    bottom: 10px;
+}
+
+#player.shielded {
+    filter: drop-shadow(0 0 20px rgb(89, 230, 89)); /* Glow effect using drop-shadow */
+    transition: filter 2.5s ease; /* Smooth transition */
+}
+
+/* Mask the Player
+#player {
+    width: 100%;
+    height: 100%;
+ } */
+
+/*#player {
+transition: transform 0.2s ease; // Smooth movement
+}*/
+
+#player.bounce {
+    animation: bounce 0.5s ease;
+}
+
+
+
+.laser {
+    position: absolute;
+    width: 5px;
+    height: 50px;
+    background: red;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.8), 
+                0 0 20px rgba(255, 0, 0, 0.6);
+    animation: beam-glow 0.4s ease-out;
+    animation-play-state: running;
+}
+
+
+
+.falling-supplies{
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    animation: fall-wiggle 1s ease-in-out infinite;
+    z-index: 2; /* Ensure they are above the background */
+}
+
+.falling-food{
+    position: absolute;
+    width: 45px;
+    height: 45px;
+    animation: fall-wiggle .5s ease-in-out infinite;
+    z-index: 2; /* Ensure they are above the background */
+}
+
+.falling-fuel{
+    position: absolute;
+    width: 35px;
+    height: 35px;
+    z-index: 2; /* Ensure they are above the background */
+}
+
+.falling-hazard {
+    position: absolute;
+    width: 35px;
+    height: 25px;
+    border: rgb(53, 46, 35);
+    border-style: none;
+    z-index: 1; /* Ensure they are above the background */
+}
+
+.fall-rotate {
+    animation: rotate-animation 5s linear infinite;
+    animation-play-state: running; /* Important: Set running as default */
+}
+
+
+
+.fall-wiggle {
+    animation: wiggle-animation 1s ease-in-out infinite;
+    animation-play-state: running
+}
+
+
+
+.overlay {
+    position: absolute;
+    border-radius: 15px;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(78, 76, 76, 0.123);
+    color: white;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+    display: none; /* Hidden by default */
+}
+
+
+.overlay-dark {
+    position: absolute;
+    border-radius: 15px;
+    background-image: url('imgs/menu05.png');
+    background-size: cover; /* Ensure the image covers the whole container */
+    background-position: center; /* Center the image */
+    background-repeat: no-repeat; /* Prevent tiling */
+    padding: 10px;
+    top: 2.5%;
+    bottom: 2.5%;
+    left: 5%;
+    right: 5%;
+    width: 90%;
+    height: 95%;
+    overflow: hidden;
+    background-color: rgba(78, 64, 43, 0.989);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    display: none; /* Hidden by default */
+}
+
+.overlay-dark h1,h2,h3,h4,h5,h6 {
+    text-align: center;
+    color: rgb(255, 255, 255);
+    background: rgba(255, 255, 255, 0.2); /* Light semi-transparent */
+    backdrop-filter: blur(8px); /* Blurs what's behind */
+    border-radius: 8px;
+}
+
+.overlay-dark p {
+    text-align: left;
+    font-size: 16px;
+    font-weight: 500;
+    color: rgb(0, 0, 0);
+    background: rgba(255, 255, 255, 0.2); /* Light semi-transparent */
+    backdrop-filter: blur(8px); /* Blurs what's behind */
+    border-radius: 8px;
+}
+
+#begintext {
+    position: absolute;
+    padding-left: 10px;
+    padding-right: 10px;
+    bottom: 3%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgb(255, 255, 255);
+    background-color: rgba(0, 0, 0, 0.692);
+    font-weight: 900; /* Bold text */
+    font-family: Iceberg;
+    animation: glow 2.25s infinite alternate;
+    display: inline-block; /* To shrink the div to the text size */
+    white-space: nowrap;
+}
+
+
+
+
+#sidebar {
+    display: flex;           /* Stack vertically */
+    flex-direction: column;  /* Top-to-bottom layout */
+    width: 150px;
+    height: 100%;
+    background-image: url('imgs/menu05.png'); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+
+
+#ui-buttons, #score, #resources {
+    width: 100%;  
+}
+
+#ui-buttons {
+    height: 25%; /* Occupy the top 25% of the sidebar */
+    background-color: rgb(99, 99, 99);
+    background-image: url('imgs/plate-floor01.jpg'); 
+    background-size: 100% auto; /* Full width, height adjusts automatically */
+    display: flex; /* Correct Flexbox syntax */
+    flex-direction: column; /* Stack buttons vertically */
+    justify-content: space-evenly; /* Evenly distribute buttons vertically */
+    align-items: center; /* Center buttons horizontally */
+    gap: 10px; /* Add spacing between buttons */
+    border: 2px solid rgb(0, 0, 0);
+    box-sizing: border-box; /* Include padding in width/height calculations */
+}
+
+#ui-buttons .content {
+    display: flex; /* Enable Flexbox for the content area */
+    flex-direction: column; /* Ensure buttons are stacked */
+    width: 100%; /* Occupy full width of the container */
+    justify-content: space-evenly; /* Evenly distribute buttons */
+    align-items: center; /* Center buttons horizontally */
+    height: 100%; /* Ensure content fills the entire parent container */
+}
+
+.sidebar-section {
+    position: relative;
+    overflow: hidden; /* Ensures content doesn't overflow during animation */
+}
+
+.cover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(0, 0, 0); /* Dark cover */
+    background-image: url('imgs/rivets02.jpg'); 
+    background-size: cover; /* Ensure the image fills the element */
+    background-position: center bottom; /* Center the image */
+    background-repeat: no-repeat; /* Prevent tiling */
+    z-index: 2; /* Keep it above the content */
+    transform: translateY(0); /* Fully cover the content initially */
+    transition: transform 3.5s ease-in-out; /* Smooth animation */
+}
+
+.sidebar-section.revealed .cover {
+    transform: translateY(-100%); /* Slide the cover up to reveal the content */
+}
+
+
+
+
+
+#score {
+    height: 15%;
+    margin: 0;
+    flex-direction: column;   /* Stack buttons vertically */
+    display: flex;           
+    align-items: top;
+    justify-content: top;
+    background-color: rgb(0, 0, 0);
+    /* border-color: hotpink; */
+    border-style: groove;
+}
+
+#timer-section {
+    height: 15%;
+    width: 100%;
+    padding-top: 5px;
+    text-align: center;
+    margin: 0;
+    font-family: "Silkscreen", sans-serif;
+    font-size: .85rem;
+    flex-direction: column;   /* Stack buttons vertically */
+    display: flex;           
+    align-items: top;
+    justify-content: top;
+    background-color: rgb(0, 0, 0);
+    color: rgb(0, 255, 21);  /* Keeps text readable */
+    /* border-color: hotpink; */
+    border-style: groove;
+    border-color: #000;
+    text-transform: uppercase;  /* Makes the text stand out */
+    pointer-events: none; /* Ensure it doesn’t interfere with interactions */
+}
+
+#combotracker, #combo-header{
+    padding-top: 5px;
+    width: 100%;
+    text-align: center;
+}
+
+.combo-text {
+    font-size: .7rem;
+}
+
+.combo-text.combo-on {
+    color:#00ffff;
+    background-color: blueviolet;
+}
+
+.sidebar-header {
+    background-color: rgba(0, 0, 0);
+    display: flex;
+    justify-content: center;
+    align-content: top;
+    width: 100%;
+    height:fit-content;
+    z-index: 500;
+}
+
+#score p {
+    margin: 0;
+    padding: 0;
+    background-color: black;
+    color: rgb(0, 255, 21);  /* Keeps text readable */
+    text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.8); /* Dark shadow for contrast */
+    letter-spacing: 1px;  /* Slight spacing for readability */
+    text-transform: uppercase;  /* Makes the text stand out */
+    pointer-events: none; /* Ensure it doesn’t interfere with interactions */
+}
+
+#scoreboard {
+    margin: 0;
+    padding: 0;
+    font-family: "Silkscreen", sans-serif;  /* Optional custom font */
+    font-size: 12px;
+    font-weight: 200;
+    color: white;  /* Keeps text readable */
+    text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.8); /* Dark shadow for contrast */
+    letter-spacing: 1px;  /* Slight spacing for readability */
+    text-transform: uppercase;  /* Makes the text stand out */
+    pointer-events: none; /* Ensure it doesn’t interfere with interactions */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#resources {
+    height: 15%;
+    display: flex;               /* Enable Flexbox */
+    flex-direction: column;      /* Stack children vertically */
+    justify-content: center;     /* Center vertically */
+    align-items: center;         /* Center horizontally */
+    gap: 10px;                   /* Space between each tracker */
+    background-color: rgb(0, 0, 0);
+    /* border-color: hotpink; */
+    border-style: groove;
+}
+
+#resources .content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Resource Tracker Wrapper */
+.resource-tracker {
+    display: flex;               /* Use Flexbox */
+    flex-direction: row;         /* Align items side by side */
+    align-items: center;         /* Vertically align items */
+    justify-content: flex-start; /* Align items to the left */
+    gap: 10px;                   /* Space between the label and the bar */
+    width: 100%;                 /* Full container width */
+}
+
+/* Resource Label */
+.resource-tracker p {
+    margin-bottom: 0;               /* Remove default margins */
+    padding-left:5px;
+    width: 54px;             /* Fixed width for labels */
+    text-align: left;        /* Align text to the left */
+    font-size: 14px;
+    color: cyan;
+    font-weight: 800;
+}
+
+/* Resource Bar Wrapper */
+.resource-bar {
+    flex-grow: 1;            /* Fill remaining space */
+    height: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid white;
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Resource Fill Bar */
+.resource-fill {
+    height: 100%;
+    width: 0%;               /* Start empty */
+    background: linear-gradient(to right, #ffcc00, #ff6600);
+    transition: width 0.4s ease-out;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#status-area {
+    height: 30%;
+    width: 100%;
+    background-image: url('imgs/game-info02.jpg'); 
+    font-family: "Silkscreen", sans-serif;
+    background-size: 100% auto; /* Full width, height adjusts automatically */
+    display: flex;               /* Enable Flexbox */
+    flex-direction: column;      /* Stack children vertically */
+    justify-content: center;     /* Center vertically */
+    align-items: center;         /* Center horizontally */
+    gap: 10px;                   /* Space between each tracker */
+    background-color: rgb(0, 0, 0);
+    border-style: groove;
+}
+
+#status-area .content {
+    display: flex;
+    flex-direction: column;
+    border:#00ffff;
+    width: 100%;
+}
+
+
+
+.status-label p{
+    font-size: smaller;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+button {
+    width: 125px; /* Optional: Set a consistent width for the buttons */
+    padding: 5px; /* Optional: Add padding to make buttons look better */
+    margin-left: 5px;
+    font-size: 14px; /* Optional: Adjust font size */
+    font-family: Iceberg;
+    cursor: pointer; /* Optional: Add pointer cursor on hover */
+}
+
+
+#welcome {
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    width: 90%;
+    height: 90%;
+    padding: 20px;
+    background: linear-gradient(135deg, #6f00ff, #ff007d);
+    color: white;
+    font-family: "Silkscreen", sans-serif;
+    border: 5px solid #00ffff;
+    border-radius: 10px;
+    box-shadow: 0 0 20px #00ffff, 0 0 40px #ff007d;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    text-align: center;
+    display: none; /* Hidden by default */
+}
+
+#welcome h2 {
+    font-size: 24px;
+    text-shadow: 0 0 10px #00ffff, 0 0 20px #ff007d;
+    padding: 4px 24px;
+}
+
+#welcome p, label {
+    font-size: 14px;
+    margin: 10px 0;
+}
+
+/* Updated layout for name and difficulty sections */
+#welcome-name,
+#welcome-difficulty {
+    display: grid; /* Use grid layout */
+    grid-template-columns: auto 1fr; /* Labels take minimal space, inputs take remaining space */
+    gap: 10px; /* Add spacing between label and input */
+    align-items: center; /* Vertically align labels and inputs */
+    width: 100%; /* Stretch to full width of parent */
+    text-align: left; /* Ensure labels are left-aligned */
+}
+
+#welcome-name label,
+#welcome-difficulty label {
+    text-align: right; /* Align labels to the right */
+}
+
+#welcome-name input,
+#welcome-difficulty select {
+    width: 100%; /* Ensure inputs take full space available */
+    padding: 5px; /* Add padding for a better look */
+    font-size: 14px; /* Match label font size */
+    border-radius: 5px; /* Optional: Rounded corners */
+    border: 1px solid #ccc; /* Optional: Add a subtle border */
+}
+
+#startButton {
+    background: #00ffff;
+    margin-top: 20px;
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 0 10px #ff007d, 0 0 20px #6f00ff;
+    transition: all 0.3s ease;
+}
+
+#startButton:hover {
+    background: #ff007d;
+    color: #fff;
+    box-shadow: 0 0 20px #00ffff, 0 0 40px #6f00ff;
+}
+
+#startButton:disabled, #startButton:disabled:hover {
+    border-color: orange;
+    box-shadow: none;
+    background: gray;
+    pointer-events: none;
+}
+
+
+
+
+
+
+
+#red-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 0, 0, 0.5);
+    pointer-events: none; /* Prevent interaction */
+    opacity: 0; /* Start invisible */
+    transition: opacity 0.2s ease-out; /* Smooth fading */
+    z-index: 1000; /* Ensure it’s above all game elements */
+}
+
+.shake {
+    animation: screen-shake 0.4s ease-in-out;
+}
+
+
+
+
+
+
+
+
+.game-overlay {
+    position: absolute;
+    display: none;
+    top: 5%; /* Adjust to your preferred position */
+    left: 5%;
+    width: 90%;
+    height: 90%;
+    background: linear-gradient(135deg, #303030, #4a4a4a); /* Industrial metallic feel */
+    border: 3px solid #707070; /* Border with a metallic color */
+    border-radius: 15px; /* Smooth edges */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6); /* Add depth */
+    z-index: 900; /* Keep behind content */
+    overflow: hidden; /* Prevent content overflow */
+    animation: pulse-border 4s infinite alternate; /* Optional subtle animation */
+}
+
+.game-overlay:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('imgs/metalbg01.jpg'); /* Industrial texture */
+    background-size: cover; /* Fill the overlay */
+    /*background-blend-mode: overlay; /* Blend with the gradient */
+    opacity: 0.3; /* Subtle texture effect */
+    z-index: 1; /* Keep behind content */
+}
+
+.game-overlay h1, .game-overlay p, .game-overlay li, #lboard-scores {
+    position: relative;
+    color: #ffffff; /* High contrast for readability */
+    z-index: 8888; /* Ensure text is above the background */
+    text-shadow: 0 2px 4px rgba(62, 255, 45, 0.8); /* Enhance text visibility */
+    font-family: 'Silkscreen', sans-serif; /* Add a retro vibe */
+    margin: 20px;
+}
+
+.game-overlay li, .game-overlay p, #lboard-scores {
+    font-size: small;
+    text-align: left;
+}
+
+.critical-text {
+    font-size: medium;
+    text-shadow: 0 2px 4px rgba(255, 0, 0, 0.8); /* Enhance text visibility */
+}
+
+#test-overlay{
+    border-radius: 10px;
+    z-index: 9000;
+    top: 2.5%;
+    left: 2.5%;
+    width: 95%;
+    height: 95%;
+    position: absolute;
+    display: flex;
+    display: none;
+    flex-direction: column;
+    /*background: linear-gradient(135deg, #303030, #4a4a4a); /* Industrial metallic feel */
+    background: url('imgs/metalbg01.jpg'); /* Industrial texture */
+    background-color: rgba(0, 0, 0, 0.5);
+    background-size: cover;
+    border: 3px solid #707070; /* Border with a metallic color */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6); /* Add depth */
+    overflow: hidden; /* Prevent content overflow */
+    animation: pulse-border 4s infinite alternate; /* Optional subtle animation */
+    color: #ffffff; /* High contrast for readability */
+    text-shadow: 0 2px 4px rgba(62, 255, 45, 0.8); /* Enhance text visibility */
+    font-family: 'Silkscreen', sans-serif;
+    font-size: small;
+    text-align: left;
+}
+
+#test-overlay p, #test-overlay li {
+    position: relative;
+    color: #ffffff; /* High contrast for readability */
+    z-index: 8888; /* Ensure text is above the background */
+    text-shadow: 0 2px 4px rgba(62, 255, 45, 0.8); /* Enhance text visibility */
+    font-family: 'Silkscreen', sans-serif; /* Add a retro vibe */
+    margin: 20px;
+}
+
+#test-overlay h1, #test-overlay p, #test-overlay li {
+    font-size: small;
+    text-align: left;
+}
+
+#test-header{
+    display: flex;
+    border-radius: 10px;
+    margin: 0;
+    padding: 0;
+    flex-direction: row;
+}
+
+.overlay-close {
+    border-top-left-radius: 10px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    background-color: rgba(255, 255, 255, 0.192); 
+    text-shadow: none;
+} 
+
+.overlay-title {
+    background-color: rgba(255, 255, 255, 0.192); 
+    border-top-right-radius: 10px;
+    color:#ffffff;
+    padding: 0;
+    margin: 0;
+    font-size:larger;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.explosion {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: radial-gradient(circle, rgba(255,200,0,1) 0%, rgba(255,0,0,1) 50%, rgba(0,0,0,0) 100%);
+    border-radius: 50%;
+    animation: explode 0.5s ease-out forwards;
+    pointer-events: none; /* Prevent interference */
+    z-index: 3000;
+}
+
+
+
+
+    
+
+/* Booster effect on the wrapper */
+#player.boosting {
+    filter: drop-shadow(0 60px 15px rgb(255, 48, 11)); /* Glow effect using drop-shadow */
+    transition: filter 0.75s ease; /* Smooth transition */
+}
+
+#model-layout{
+    display: flex;
+    justify-content: space-evenly;
+}
+
+#welcome-model-select {
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+#welcome-model-select img{
+    object-fit: contain; 
+}
+
+
+.character {
+    box-sizing: content-box;
+    display: flex;
+    align-items:end;
+    margin-bottom: 10px;
+    cursor: pointer;
+    margin: 10px;
+    border: 2px solid transparent; /* Default border */
+    transition: border 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.character:hover {
+    border: 2px solid lightblue; /* Hover effect for unselected characters */
+}
+
+/* Prevent hover effect for selected characters */
+.character.selected {
+    border: 2px solid rgb(232, 117, 255); /* The selected border */
+    border-radius: 10px;
+}
+
+.character.selected:hover {
+    border: 2px solid blue; /* Maintain the blue border on hover */
+}
+
+
+/* Booster flame effect */
+#player.boosting::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 40px;
+    bottom: -20px; /* Place the flame just below the player */
+    left: 50%;     /* Center horizontally */
+    transform: translateX(-50%); /* Correct centering */
+    background: radial-gradient(circle, orange, red, transparent);
+    animation: booster-flame 0.2s infinite;
+    z-index: -1; /* Ensure the flame is behind the player */
+}
+
+
+
+#game-settings, #game-settings p{
+    display: flex;
+    justify-content: space-evenly;
+    margin: 0;
+    padding: 0;
+    padding-left: 10px;
+    padding-bottom: 10px;
+}
+
+#game-settings p {
+    padding-right: 20px;
+}
+
+.setting-container {
+    width: 30%;
+    display: flex;
+}
+
+
+/* Container for the toggle switch */
+.toggle-container {
+    width: 35px;
+    height: 20px;
+    background-color: gray; /* Background for OFF state */
+    border-radius: 15px; /* Rounded corners */
+    position: relative; /* For positioning the circle inside */
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Smooth color change */
+}
+
+/* The sliding circle */
+.toggle-circle {
+    width: 16px;
+    height: 16px;
+    background-color: white; /* Circle color */
+    border-radius: 50%; /* Makes it a circle */
+    position: absolute;
+    top: 2px; /* Center vertically */
+    left: 2px; /* Start on the left */
+    transition: left 0.3s ease; /* Smooth sliding */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Subtle shadow */
+}
+
+/* ON state styles */
+.toggle-container.on {
+    background-color: lightgreen; /* Background for ON state */
+}
+
+.toggle-container.on .toggle-circle {
+    left: 19px; /* Move to the right for ON state */
+}
+
+#spotlight {
+    position: absolute;
+    display:none;
+    left: 225px;
+    width: 65px; /* Adjust size as needed */
+    height: 700px;
+    background: linear-gradient(to bottom, rgba(255, 255, 0, 0.3), rgba(255, 255, 0, 0.01));
+    clip-path: polygon(35% 0%, 65% 0%, 100% 100%, 0% 100%);
+    pointer-events: none; /* Allows interaction with elements underneath */
+    z-index: 2; /* Ensure it appears above other elements */
+    transition: transform 0.1s linear; /* Smooth movement */
+}
+
+
+#countdown {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 200px; /* Large initial size */
+    font-weight: bold;
+    color: rgb(241, 112, 231);
+    text-align: center;
+    opacity: 0; /* Start invisible */
+    pointer-events: none; /* Prevent interaction */
+    z-index: 10; /* Ensure it appears above everything */
+    animation: fadeScale 1s ease-out forwards;
+}
+
+@keyframes fadeScale {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(2); /* Start larger */
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5); /* Shrink and fade out */
+    }
+}
+
+/* Resource Tracker Wrapper */
+.health-tracker {
+    padding-top: 10px;
+    padding-left: 10px;
+    display: flex;               /* Use Flexbox */
+    flex-direction: column;         /* Align items side by side */
+    align-items: left;         /* Vertically align items */
+    justify-content: flex-start; /* Align items to the left */                 /* Space between the label and the bar */
+    width: 150px;                 /* Full container width */
+}
+
+.health-tracker p {
+    isolation: isolate;
+    padding-top: 0px;
+    margin: 0;
+    color: #ffffff; /* High contrast for readability */
+    z-index: 500; /* Ensure text is above the background */
+    text-shadow: 0 2px 4px rgba(62, 255, 45, 0.8); /* Enhance text visibility */
+    font-family: 'Silkscreen', sans-serif; /* Add a retro vibe */
+    font-size: medium;
+    font-weight: 700;
+}
+
+/* Resource Bar Wrapper */
+.health-bar {
+    padding-bottom: 0px;
+    width: 100%;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid white;
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Resource Fill Bar */
+.health-fill {
+    height: 100%;
+    width: 100%; 
+    background: linear-gradient(to right, #1900ff, #00f7ff);
+    transition: width 0.4s ease-out;
+}
+
+
+#high-name-entry {
+    display: flex; 
+    height: 30px;
+    z-index: 9900;
+    padding-bottom: 30px; 
+    padding-top: 30px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin: 0px; 
+    align-items: center; 
+    width: 100%; 
+    position: relative;
+    color: #ffffff; /* High contrast for readability */
+    text-shadow: 0 2px 4px rgba(62, 255, 45, 0.8); /* Enhance text visibility */
+    font-family: 'Silkscreen', sans-serif; /* Add a retro vibe */
+    font-size: small;
+}
+
+
+
+
+
+/* Resource Tracker Wrapper */
+.rocket-tracker {
+    padding-top: 10px;
+    padding-right: 10px;
+    display: flex;               /* Use Flexbox */
+    flex-direction: column;         /* Align items side by side */
+    align-items: left;         /* Vertically align items */
+    justify-content: flex-start; /* Align items to the left */                 /* Space between the label and the bar */
+    width: 150px;                 /* Full container width */
+}
+
+.rocket-tracker p {
+    isolation: isolate;
+    padding-top: 0px;
+    margin: 0;
+    color: #ffffff; /* High contrast for readability */
+    z-index: 500; /* Ensure text is above the background */
+    text-shadow: 0 2px 4px rgba(62, 255, 45, 0.8); /* Enhance text visibility */
+    font-family: 'Silkscreen', sans-serif; /* Add a retro vibe */
+    font-size: medium;
+    font-weight: 700;
+}
+
+/* Resource Bar Wrapper */
+.rocket-bar {
+    padding-bottom: 0px;
+    width: 100%;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid white;
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Resource Fill Bar */
+.rocket-fill {
+    height: 100%;
+    width: 100%; 
+    background: linear-gradient(to right, #1900ff, #00f7ff);
+    transition: width 0.4s ease-out;
+}
+
+#UI-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}

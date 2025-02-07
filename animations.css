@@ -1,0 +1,130 @@
+@keyframes screen-shake {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(-10px, 5px); }
+    50% { transform: translate(10px, -5px); }
+    75% { transform: translate(-10px, -5px); }
+    100% { transform: translate(0, 0); }
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); } /* Moves up slightly */
+}
+
+@keyframes beam-glow {
+    0% { opacity: 1; }
+    100% { opacity: 0; transform: scaleY(0.5); }
+}
+
+@keyframes rotate-animation {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes wiggle-animation {
+    0%, 100% { transform: rotate(-15deg); }
+    50% { transform: rotate(15deg); }
+}
+
+@keyframes glow {
+    0%, 100% {
+            text-shadow: 0 0 5px rgb(0, 0, 0), 0 0 10px rgb(237, 148, 255);
+        }
+        50% {
+            text-shadow: 0 0 5px rgb(255, 0, 200), 0 0 10px rgb(173, 230, 211);
+        }
+    }
+
+@keyframes water-drip {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 0 200%;
+    }
+}
+
+/* Electric wave animation */
+@keyframes electric-wave {
+    0% {
+        border-image-source: linear-gradient(90deg, transparent, blue, transparent);
+        border-image-slice: 1;
+    }
+    25% {
+        border-image-source: linear-gradient(180deg, transparent, blue, transparent);
+    }
+    50% {
+        border-image-source: linear-gradient(270deg, transparent, blue, transparent);
+    }
+    75% {
+        border-image-source: linear-gradient(360deg, transparent, blue, transparent);
+    }
+    100% {
+        border-image-source: linear-gradient(90deg, transparent, blue, transparent);
+    }
+}
+
+#light-trail {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 10px; /* Size of the light */
+    height: 10px;
+    border-radius: 50%; /* Make it circular */
+    background: radial-gradient(circle, cyan, transparent); /* Glowing effect */
+    z-index: 2000; /* Above game elements */
+    pointer-events: none; /* Prevent interaction */
+    box-shadow: 0 0 20px 10px cyan; /* Glow effect */
+    animation: light-move 0.75s linear infinite; /* Smooth animation around the border */
+}
+
+@keyframes light-move {
+    0% {
+        transform: translate(0, 0); /* Top-left corner */
+    }
+    25% {
+        transform: translate(490px, 0); /* Top-right corner */
+    }
+    50% {
+        transform: translate(490px, 690px); /* Bottom-right corner */
+    }
+    75% {
+        transform: translate(0, 690px); /* Bottom-left corner */
+    }
+    100% {
+        transform: translate(0, 0); /* Back to Top-left corner */
+    }
+}
+
+@keyframes pulse-border {
+    from {
+        border-color: #707070;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    }
+    to {
+        border-color: #ffffff;
+        box-shadow: 0 4px 20px rgba(255, 255, 255, 0.6);
+    }
+}
+
+@keyframes explode {
+    0% {
+        transform: scale(0.5);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+@keyframes flame-flicker {
+    0% { transform: scaleY(1); opacity: 1; }
+    50% { transform: scaleY(1.2); opacity: 0.8; }
+    100% { transform: scaleY(1); opacity: 1; }
+}
+
+@keyframes booster-flame {
+    0% { opacity: 1; transform: translateX(-50%) scale(1); }
+    100% { opacity: 0; transform: translateX(-50%) scale(1.5); }
+}

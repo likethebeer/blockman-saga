@@ -1,0 +1,34 @@
+Bugs to fix:
+
+1. Keys should be all lowercase
+2. Prevent "enter" bug
+3. Eaz mode: Ketchup and losing sound
+
+Enhancement ideas:
+
+1. **DONE** Horizontally moving hazards
+2. Stand still to cause lightning, recharge laser or jet pack in the lightning pool on the ground?
+3. Ground based/rolling hazards?
+4. Hazards that explode on impact with the ground? Shrapnel does damage? Make all objects/player smaller to give more room?
+5. Hazards that hit the ground cause damage to the ship? Can only let so many hit the ground? Maybe this is Level 2?
+6. How would I implement a boss fight? Boost to get close enough to shoot vulnerable points?
+7. Directional laser? Using mouse? Or move movement to wasd and use arrows?
+8. Dash ability? To what end? Just for a mechanic?
+9. **DONE** Time-based escalation of difficulty
+10. Health/shield system
+11. Achievement system (destroy Y hazards without missing, collect X resources in a game, etc)
+12. Separate character strengths/weaknesses
+13. Unlockable characters / difficulties
+14. Power ups
+15. Waves of hazards? Temporary environment effects (laser is out? wind while boosting?)
+16. Allow logging in? Username / Password? Keep personal stats?
+17. Sprite sheets?
+18. Random "gamma waves" that require the user to get to a safe place before a radioactive burst happens?
+19. Mini bosses (drones?) that need to be shot multiple times? If exploded within a certain time they produce health packs?
+20. 
+
+
+
+
+
+

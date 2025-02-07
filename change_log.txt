@@ -1,0 +1,38 @@
+Blockman Change Log:
+
+00.06.02: Added drone attack.
+00.06.01: Added health system. Spotlight attack balance fixes. Bug fixes.
+
+00.05.07: Added spotlight attack. Added escalation logic.
+00.05.06: More bug fixes. Added game timer.
+00.05.05: Bug fixes. So many bug fixes.
+00.05.04: Added horizontal movement to objects. Refactored movement / collision tracking systems.
+00.05.03: Added character selection. Bug fixes.
+00.05.02: Bug fixes.
+00.05.01: Implemented laser and booster functionality!
+ 
+00.04.05: Updated UI, bug fixes
+00.04.04: Added leader board, bug fixes.
+00.04.03: Updates to multiple overlays, sound improvements, bug fixes.
+00.04.02: Added sidebar reveal elements, updated welcome flow.
+00.04.01: Refactored to use HTMLImgElement instead of Div for player/objects.
+
+00.03.01: Redesigned spawning system to improve balance. Started change log. Bug fixes.
+
+00.02.05: Added grand finale firework functionality. Redesigned agreement overlay.
+00.02.04: Added canvas system for collision logic. Added fireworks effect for high score game over.
+00.02.03: Added screen shake for overcollection. Modified scoring system. Added high score logic. Bug fixes.
+00.02.02: Implemented combo and catch streak scoring logic.
+00.02.01: Designed initial scoring system. Modified game over behavior with respect to spawning objects. Implemented game loop functionality.
+
+00.01.11: Added agreement overlay, sound effects. Bug fixes.
+00.01.10: Added new resource models. Improved pause logic.
+00.01.09: Added hazard models. Added game-ending player models. Added sound effects.
+00.01.08: Improved random sound generator to allow for categorization. Improved sound effects.
+00.01.07: Improved sound effect system to allow for random sounds.
+00.01.06: Improved movement to use frame animation rather than hardcoded pixel values. Bug fixes. 
+00.01.05: Improved pause logic. Refactored overlay logic. Added instructions overlay.
+00.01.04: Modified pause logic to separate user-initiated and auto pauses (based on screen focus)
+00.01.03: Bug fixes. Added laser effect. Improved sound effects. Added pause logic. Added pause overlay.
+00.01.02: Added player model. Added game over overlay. Bug fixes.
+00.01.01: Game Created!
