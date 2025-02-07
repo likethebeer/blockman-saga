@@ -46,7 +46,6 @@ let comboTracker = [];  // Tracks collected unique resource types
 let survivalTime = 0;
 let survivalScore = 0; // Tracks score from survival time
 let playerScore = 0;  // Tracks the total score
-/*(highScores[highScores.length - 1]?.score || 0)*/
 let storedScores = JSON.parse(localStorage.getItem('blockmanHighScores') || '[]');
 let testStored = JSON.parse(localStorage.getItem('blockmanHighScores') || '[]');
 let previousScore = 0; // For logging and UI updates
