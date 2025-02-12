@@ -262,6 +262,27 @@ function toggleDebug() {
     console.log(`Debug mode is now ${debugMode ? "ON" : "OFF"}`);
 }
 
+let eazMode = false;
+function toggleEazMode() {
+    const toggle = document.getElementById('eaz-toggle');
+    const status = document.getElementById('eaz-status');
+
+    // Toggle the state
+    eazMode = !eazMode;
+
+    // Update the UI
+    if (eazMode) {
+        toggle.classList.add('on'); // Apply ON styles
+        status.textContent = "Eaz Mode ON ";
+    } else {
+        toggle.classList.remove('on'); // Remove ON styles
+        status.textContent = "Eaz Mode OFF";
+    }
+
+    // Add your music logic here (e.g., play or pause audio)
+    console.log(`Eaz Mode is now ${eazMode ? "ON" : "OFF"}`);
+}
+
 let selectedCharacter = null;
 
 function selectCharacter(character) {
@@ -615,6 +636,8 @@ function gameLoop(currentTime) {
     updatePlayerPosition();
     moveFallingObjects(deltaTime);
     moveDrone(deltaTime);
+    updateDrones();            // Check if drones should attack
+    updateDroneProjectiles();  // Move drone projectiles and check for collisions
     checkObjectCollisions();
     checkLaserCollisions();
     // Check if all resources are collected
@@ -637,7 +660,6 @@ function moveDrone(deltaTime) {
 
     // Move drone side to side
     leftPosition += drone.horizontalSpeed * deltaTime * 60;
-    console.log("Moving drone!");
 
     // Reverse direction if hitting screen edges
     if (leftPosition <= 0 || leftPosition >= gameContainer.offsetWidth - droneElement.offsetWidth) {
@@ -1272,7 +1294,7 @@ function gameOver(reason) {
     } else {
         setPlayerModel(selectedCharacter + "-model-sad.gif");
         gameOverReasonText.textContent = "☠️ ☠️ You lose! ☠️ ☠️";
-        playRandomSound("Death");
+        eazMode ? playSound("death04") : playRandomSound("Death");
         setTimeout(playSound, 1500, "evillaugh");
     }
 }
@@ -1442,9 +1464,103 @@ function spawnDrone() {
         element: object,
         horizontalSpeed,
         damage,
-        health
+        health,
+        attackInterval: 2000, // Attack every 2 seconds (adjust as needed)
+        lastAttackTime: Date.now()
     });
 }
+
+// Global array for drone projectiles
+const droneProjectiles = [];
+
+function spawnDroneProjectile(drone) {
+    const projectile = document.createElement('div');
+    projectile.classList.add('drone-projectile');
+    projectile.style.position = "absolute";
+    projectile.style.width = "10px";
+    projectile.style.height = "10px";
+    projectile.style.backgroundColor = "red"; // You can style this as needed
+
+    // Start at the drone's position
+    projectile.style.left = drone.element.style.left;
+    projectile.style.top = drone.element.style.top;
+    
+    gameContainer.appendChild(projectile);
+
+    // Calculate the direction from the drone to the player
+    const droneRect = drone.element.getBoundingClientRect();
+    const playerRect = player.getBoundingClientRect();
+    //const playerRect = player.element.getBoundingClientRect(); // Assumes you have a global player object
+    let dx = playerRect.left - droneRect.left;
+    let dy = playerRect.top - droneRect.top;
+    const magnitude = Math.sqrt(dx * dx + dy * dy);
+    dx /= magnitude;
+    dy /= magnitude;
+
+    // Add the projectile to the tracking array
+    droneProjectiles.push({
+        element: projectile,
+        dx,
+        dy,
+        speed: 5,       // Adjust speed as desired
+        damage: drone.damage
+    });
+}
+
+function updateDrones() {
+    const now = Date.now();
+    drones.forEach(drone => {
+        // Check if enough time has passed since the last attack
+        if (now - drone.lastAttackTime >= drone.attackInterval) {
+            spawnDroneProjectile(drone);
+            drone.lastAttackTime = now;
+        }
+        
+        // (Optional) You might also update drone position here if it moves
+    });
+}
+
+
+function updateDroneProjectiles() {
+    // Use a reverse loop if you plan to remove items while iterating
+    for (let i = droneProjectiles.length - 1; i >= 0; i--) {
+        const proj = droneProjectiles[i];
+        // Get current position
+        let left = parseFloat(proj.element.style.left);
+        let top = parseFloat(proj.element.style.top);
+        
+        // Update the position based on direction and speed
+        left += proj.dx * proj.speed;
+        top += proj.dy * proj.speed;
+        proj.element.style.left = left + "px";
+        proj.element.style.top = top + "px";
+        
+        // Check for collision with the player
+        if (detectCollision(proj.element, player)) {
+            takeDamage(proj.damage)
+            // Remove the projectile
+            proj.element.remove();
+            droneProjectiles.splice(i, 1);
+            continue;
+        }
+        
+        // Remove projectile if it goes out of bounds (adjust boundaries as needed)
+        if (left < 0 || top < 0 || left > gameContainer.clientWidth || top > gameContainer.clientHeight) {
+            proj.element.remove();
+            droneProjectiles.splice(i, 1);
+        }
+    }
+}
+
+function detectCollision(el1, el2) {
+    const rect1 = el1.getBoundingClientRect();
+    const rect2 = el2.getBoundingClientRect();
+    return !(rect1.right < rect2.left ||
+             rect1.left > rect2.right ||
+             rect1.bottom < rect2.top ||
+             rect1.top > rect2.bottom);
+}
+
 
 function spawnFallingObject() {
     const currentTime = Date.now();
@@ -1482,7 +1598,7 @@ function spawnFallingObject() {
     if (isResource) {
         object.src = `imgs/crate-${randomObject}.png`;
     } else {
-        object.src = `imgs/fallingObject${Math.ceil(Math.random() * 3)}.png`;
+        eazMode ? object.src = "imgs/ketchup.png" : object.src = `imgs/fallingObject${Math.ceil(Math.random() * 3)}.png`;
     }
     // Randomize animations
     const animations = ['fall-rotate', 'fall-wiggle'];
