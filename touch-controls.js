@@ -2,23 +2,20 @@
 // touch-controls.js
 // Mobile / tablet support for Blockman.
 //
-// Design goal: the game loop in main.js already drives all movement off the
-// `keysPressed` object (ArrowLeft / ArrowRight / ArrowUp for boost, 'e' for
-// laser). So instead of adding a parallel input path, a touch simply *acts
-// like a held key*. That means the loop, collision, and boost logic need
-// zero changes -- this file just flips the same flags main.js already reads.
+// A touch *acts like a held key*: buttons flip the same `keysPressed` flags the
+// keyboard uses, so the game loop needs no changes. We use Pointer Events with
+// pointer capture (not raw touchstart/touchend) so a hold keeps registering even
+// if the finger slides slightly off the button, and so multi-touch (move + fire)
+// is reliable.
 //
 
 (function () {
-    // Only activate on devices that actually have touch. Desktop keeps the
-    // pure keyboard experience with no on-screen buttons cluttering the view.
+    // Only activate on devices that actually have touch. Desktop stays keyboard-only.
     const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
     if (!isTouch) return;
 
     document.body.classList.add('touch-enabled');
 
-    // Mirror the keyboard handlers from main.js exactly: setting ArrowUp also
-    // needs to kick the boost sound/state, same as the real keydown listener.
     function pressKey(key) {
         keysPressed[key] = true;
         if (key === 'ArrowUp') updateBoostState(true);
@@ -28,22 +25,25 @@
         if (key === 'ArrowUp') updateBoostState(false);
     }
 
-    // Bind a button so that holding it = holding the key, releasing = keyup.
+    // Hold a button = hold the key. Pointer capture keeps the press bound to this
+    // button until the finger lifts, even if it drifts off the button's bounds.
     function bindHold(btn, key) {
         if (!btn) return;
-        const start = (e) => {
-            e.preventDefault();          // stop the tap from scrolling / zooming
+        const down = (e) => {
+            e.preventDefault();
             btn.classList.add('pressed');
             pressKey(key);
+            try { btn.setPointerCapture(e.pointerId); } catch (_) {}
         };
-        const end = (e) => {
-            e.preventDefault();
+        const up = (e) => {
+            if (e) e.preventDefault();
             btn.classList.remove('pressed');
             releaseKey(key);
         };
-        btn.addEventListener('touchstart', start, { passive: false });
-        btn.addEventListener('touchend', end, { passive: false });
-        btn.addEventListener('touchcancel', end, { passive: false });
+        btn.addEventListener('pointerdown', down);
+        btn.addEventListener('pointerup', up);
+        btn.addEventListener('pointercancel', up);
+        btn.addEventListener('lostpointercapture', up);
     }
 
     bindHold(document.getElementById('touch-left'), 'ArrowLeft');
@@ -51,39 +51,24 @@
     bindHold(document.getElementById('touch-boost'), 'ArrowUp');
     bindHold(document.getElementById('touch-fire'), 'e');
 
-    // Pause is a tap, not a hold -- mirror the spacebar handler in main.js.
+    // Pause is a tap, not a hold.
     const pauseBtn = document.getElementById('touch-pause');
     if (pauseBtn) {
-        pauseBtn.addEventListener('touchstart', (e) => {
+        pauseBtn.addEventListener('pointerdown', (e) => {
             e.preventDefault();
             if (!isGameOver && isGameOn) {
                 callManualPause();
                 playRandomSound('Pause');
             }
-        }, { passive: false });
+        });
     }
 
-    // Safety net: if every finger leaves the screen, clear any still-held
-    // virtual keys. Prevents a "stuck" direction if a finger slides off a
-    // button and its own touchend never fires.
-    window.addEventListener('touchend', (e) => {
-        if (e.touches.length === 0) {
-            ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'e'].forEach((k) => {
-                if (keysPressed[k]) releaseKey(k);
-            });
-            document.querySelectorAll('.touch-btn.pressed')
-                .forEach((b) => b.classList.remove('pressed'));
-        }
-    }, { passive: true });
-
-    // The title screen says "PRESS ENTER TO BEGIN" -- but phones have no Enter
-    // key, so the game would be unreachable on mobile. Make a tap on the title
-    // run the same start flow. beginGameFromTitle() lives in main.js.
+    // Phones have no Enter key, so tapping the title screen starts the game.
     const title = document.getElementById('game-title');
     if (title) {
-        title.addEventListener('touchstart', (e) => {
+        title.addEventListener('pointerdown', (e) => {
             e.preventDefault();
             if (typeof beginGameFromTitle === 'function') beginGameFromTitle();
-        }, { passive: false });
+        });
     }
 })();

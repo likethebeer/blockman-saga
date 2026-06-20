@@ -1659,7 +1659,8 @@ function spawnFallingObject() {
         : (eazMode ? objectSprites.ketchup : objectSprites.hazards[Math.floor(Math.random() * 3)]);
     const spin = randomObject !== "supplies"; // hazards/fuel/food tumble as they fall
 
-    playSound("buttonHover");
+    // (Removed the per-spawn "buttonHover" sound: a new Audio() on every object
+    // spawn churned audio objects and caused intermittent stutter on mobile.)
     // Track cooldown for the spawned type
     if (randomObject !== "hazard") {
         spawnCooldowns[randomObject] = currentTime; // Update the cooldown timer

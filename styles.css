@@ -125,11 +125,12 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url('imgs/background02.jpg'); /* Background image */
+    /* Dim via a gradient overlay rather than a CSS filter: moving the player DOM
+       element over a filtered layer forced costly per-frame repaints on mobile. */
+    background-image: linear-gradient(rgba(0, 0, 0, 0.34), rgba(0, 0, 0, 0.34)), url('imgs/background02.jpg');
     background-size: cover; /* Ensure the image covers the whole container */
     background-position: center; /* Center the image */
     background-repeat: no-repeat; /* Prevent tiling */
-    filter: brightness(70%) opacity(80%); /* Apply the filter only to the background */
     z-index: 0; /* Ensure it’s below game elements */
     pointer-events: none; /* Ensure it doesn’t interfere with interactions */
 }
