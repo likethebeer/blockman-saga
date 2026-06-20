@@ -639,10 +639,10 @@ function gameLoop(currentTime) {
             laserCooldown = true;
             setTimeout(() => (laserCooldown = false), 400); // Cooldown duration
         }
-        player.style.left = `${playerPosition}px`;
     }
     checkPlayerMovement();
     updatePlayerPosition();
+    applyPlayerTransform();
     moveFallingObjects(deltaTime);
     moveDrone(deltaTime);
     updateDrones();            // Check if drones should attack
@@ -722,6 +722,14 @@ function moveFallingObjects(deltaTime) {
 }
 
 
+function applyPlayerTransform() {
+    // Position the player via a transform on its own compositor layer, so moving
+    // it doesn't repaint the background every frame.
+    const containerHeight = objectsCanvas.height || gameContainer.clientHeight;
+    const topY = containerHeight - playerBottom - 65; // 65 = player height (CSS)
+    player.style.transform = `translate3d(${playerPosition}px, ${topY}px, 0)`;
+}
+
 function updatePlayerPosition() {
     // Track position numerically instead of reading getComputedStyle every frame
     // (that forced a layout recompute and was a key source of mobile jank).
@@ -752,7 +760,6 @@ function updatePlayerPosition() {
         if (!isBoosting) {
             newBottom = playerBottom - gravity;
             playerBottom = newBottom;
-            player.style.bottom = `${newBottom}px`;
         }
     } else {
         // Prevent the player from falling below the ground
@@ -760,10 +767,8 @@ function updatePlayerPosition() {
             verticalSpeed = 0;
             playerSpeed = 5;
             playerBottom = 10;
-            player.style.bottom = '10px';
         } else {
             playerBottom = newBottom;
-            player.style.bottom = `${newBottom}px`;
         }
     }
 }
@@ -843,8 +848,7 @@ let startStillTime = null; // Timestamp when player stopped moving
 let lastPlayerPosition = parseFloat(player.style.left) || 0;
 
 function checkPlayerMovement() {
-    const playerPosition = parseFloat(player.style.left) || 0; // Track horizontal position
-
+    // Uses the tracked global playerPosition (player is positioned via transform)
     if (playerPosition !== lastPlayerPosition || isBoosting) {
         // Player moved
         if (!isPlayerMoving && startStillTime !== null) {
@@ -905,14 +909,11 @@ function fireLaser() {
     const laserWidth = 5;  // Default width, can be changed later
     // Get player and game-container elements
     const gameContainer = document.getElementById('game-container');
-    // Use computed styles for accurate player positioning
-    const playerStyles = window.getComputedStyle(player);
-    const playerLeft = parseInt(playerStyles.left, 10);  // Horizontal position
-    const playerBottom = parseInt(playerStyles.bottom, 10); // Vertical position
-    const playerHeight = parseInt(playerStyles.height, 10); // Player's height
+    // Player is positioned via transform now — use the tracked globals.
+    const playerHeight = 65;
     // Calculate laser's starting position
-    const laserX = playerLeft + player.offsetWidth / 2 - laserWidth / 2;  // Center horizontally
-    const laserY = playerBottom + playerHeight;  // Top of the player\
+    const laserX = playerPosition + player.offsetWidth / 2 - laserWidth / 2;  // Center horizontally
+    const laserY = playerBottom + playerHeight;  // Top of the player
     // Set laser's position
     laser.style.left = `${laserX}px`;
     laser.style.bottom = `${laserY}px`;  // Use bottom since player uses bottom
@@ -1374,7 +1375,7 @@ function sizeObjectsCanvas() {
     objectsCanvas.height = objectsCanvas.clientHeight;
 }
 sizeObjectsCanvas();
-window.addEventListener('resize', sizeObjectsCanvas);
+window.addEventListener('resize', () => { sizeObjectsCanvas(); applyPlayerTransform(); });
 
 function loadSprite(name) { const img = new Image(); img.src = `imgs/${name}`; return img; }
 const objectSprites = {
@@ -1694,6 +1695,7 @@ function startGame() {
     isGameOn = true;
     document.body.classList.add('playing'); // reveal mobile touch controls
     sizeObjectsCanvas();  // ensure the canvas buffer matches the current container size
+    applyPlayerTransform();  // position the player before the first frame
     // Initialize lastTime before the game starts
     lastTime = performance.now();
     console.log*(`Music: ${musicOn}`);

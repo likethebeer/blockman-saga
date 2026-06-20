@@ -161,8 +161,11 @@ body {
     position: absolute;
     width: auto; /* Let the image scale to fit the container */
     height: 65px; /* Maintain the aspect ratio */
-    left: 225px;
-    bottom: 10px;
+    left: 0;
+    top: 0;
+    /* Positioned via transform (see applyPlayerTransform in main.js) on its own
+       compositor layer, so moving it doesn't repaint the background each frame. */
+    will-change: transform;
 }
 
 #player.shielded {
