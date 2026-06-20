@@ -3,7 +3,10 @@ const player = document.getElementById('player');
 const playerWrapper = document.getElementById('player-wrapper');
 const gameContainer = document.getElementById('game-container');
 let playerPosition = 225; // Starting position
+let playerBottom = 10;    // Vertical position from the floor (tracked to avoid per-frame layout reads)
 let playerSpeed = 5;  // Speed of movement
+let framePlayerRect = null; // Player + object-canvas rects, computed once per frame and
+let frameCanvasRect = null; // shared by the collision checks (avoids extra forced reflows)
 let isBoosting = false;
 let verticalSpeed = 0;
 const gravity = 0.15;  // How fast the player falls
@@ -644,6 +647,10 @@ function gameLoop(currentTime) {
     moveDrone(deltaTime);
     updateDrones();            // Check if drones should attack
     updateDroneProjectiles();  // Move drone projectiles and check for collisions
+    // Read these once per frame and share them with the collision checks below,
+    // so we don't force the browser to recompute layout multiple times.
+    frameCanvasRect = objectsCanvas.getBoundingClientRect();
+    framePlayerRect = player.getBoundingClientRect();
     checkObjectCollisions();
     checkLaserCollisions();
     renderObjects();           // Draw falling objects to the canvas
@@ -716,12 +723,14 @@ function moveFallingObjects(deltaTime) {
 
 
 function updatePlayerPosition() {
-    const playerStyles = window.getComputedStyle(player);
-    const playerBottom = parseInt(playerStyles.bottom, 10);
-    const playerTop = parseInt(playerStyles.top, 10);
+    // Track position numerically instead of reading getComputedStyle every frame
+    // (that forced a layout recompute and was a key source of mobile jank).
+    const containerHeight = objectsCanvas.height || gameContainer.clientHeight;
+    const playerH = 65; // #player height is fixed at 65px in CSS
+    const playerTop = containerHeight - playerBottom - playerH;
     let newBottom = Math.max(playerBottom + verticalSpeed, 10);
 
-       if (!isBoosting && playerBottom == 10 && BoostModule.boostJuice < 100) {
+    if (!isBoosting && playerBottom === 10 && BoostModule.boostJuice < 100) {
         BoostModule.recoverPower(1);
         updateBoostBar();
     }
@@ -741,7 +750,8 @@ function updatePlayerPosition() {
     if (playerTop <= 0) {
         verticalSpeed = 0;
         if (!isBoosting) {
-            newBottom = (playerBottom - gravity);
+            newBottom = playerBottom - gravity;
+            playerBottom = newBottom;
             player.style.bottom = `${newBottom}px`;
         }
     } else {
@@ -749,8 +759,10 @@ function updatePlayerPosition() {
         if (newBottom <= 10 && !isBoosting) {
             verticalSpeed = 0;
             playerSpeed = 5;
+            playerBottom = 10;
             player.style.bottom = '10px';
         } else {
+            playerBottom = newBottom;
             player.style.bottom = `${newBottom}px`;
         }
     }
@@ -928,10 +940,10 @@ function fireLaser() {
 
 function checkObjectCollisions() {
     if (debugMode || isGameOver) return; // Skip collision logic in debug mode
-    const playerRect = player.getBoundingClientRect();
+    const playerRect = framePlayerRect || player.getBoundingClientRect();
     // Objects live on the canvas in canvas-pixel coords; convert to viewport
     // coords once via the canvas rect, then compare (same overlap test as before).
-    const c = objectsCanvas.getBoundingClientRect();
+    const c = frameCanvasRect || objectsCanvas.getBoundingClientRect();
     //Prevents splicing at a bad spot in the index as items are removed
     for (let i = fallingObjects.length - 1; i >= 0; i--) {
         const object = fallingObjects[i];
@@ -980,7 +992,7 @@ function checkLaserCollisions() {
             }
             
         });
-        const c = objectsCanvas.getBoundingClientRect();
+        const c = frameCanvasRect || objectsCanvas.getBoundingClientRect();
         fallingObjects.forEach((object, objectIndex) => {
             if (!object.isResource) {
             const laserRect = laser.element.getBoundingClientRect();

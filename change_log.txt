@@ -1,6 +1,6 @@
 Blockman Change Log:
 
-00.07.04: Performance — falling objects (resources + hazards) now render on a <canvas> with numeric positions and math-based collisions, instead of per-object DOM elements + getBoundingClientRect every frame. Removes the layout thrash that made the game choppy, especially on mobile.
+00.07.04: Performance — falling objects (resources + hazards) now render on a <canvas> with numeric positions and math-based collisions, instead of per-object DOM elements + getBoundingClientRect every frame. The player is also tracked numerically now (no per-frame getComputedStyle), and collision rects are read once per frame. Removes the layout thrash that made the game choppy, especially on mobile. Also moved the touch controls out of #game-container so the screen-shake no longer displaces them.
 
 00.07.03: Mobile polish — touch controls moved to a dedicated bottom deck so they no longer cover the play field; removed backdrop-filter blur from the buttons for smoother performance.
 

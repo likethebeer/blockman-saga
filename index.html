@@ -192,14 +192,16 @@
                     <span id=gameOverReason>Game Over!</span>
                     <button id="restart" style="display: block; margin: 20px auto; padding: 10px 20px; font-size: 16px;">Restart</button>
                 </div>
-                <div id="touch-controls" aria-hidden="true">
-                    <button id="touch-left"  class="touch-btn" type="button" aria-label="Move left">&#9664;</button>
-                    <button id="touch-right" class="touch-btn" type="button" aria-label="Move right">&#9654;</button>
-                    <button id="touch-fire"  class="touch-btn" type="button" aria-label="Fire laser">&#128293;</button>
-                    <button id="touch-boost" class="touch-btn" type="button" aria-label="Boost">&#128640;</button>
-                    <button id="touch-pause" class="touch-btn" type="button" aria-label="Pause">&#10073;&#10073;</button>
-                </div>
             </div>
+        </div>
+        <!-- Touch controls live OUTSIDE #game-container so the screen-shake
+             transform on the container can't capture the fixed control deck. -->
+        <div id="touch-controls" aria-hidden="true">
+            <button id="touch-left"  class="touch-btn" type="button" aria-label="Move left">&#9664;</button>
+            <button id="touch-right" class="touch-btn" type="button" aria-label="Move right">&#9654;</button>
+            <button id="touch-fire"  class="touch-btn" type="button" aria-label="Fire laser">&#128293;</button>
+            <button id="touch-boost" class="touch-btn" type="button" aria-label="Boost">&#128640;</button>
+            <button id="touch-pause" class="touch-btn" type="button" aria-label="Pause">&#10073;&#10073;</button>
         </div>
         <div id="sidebar">
             <div id="ui-buttons" class="sidebar-section">
