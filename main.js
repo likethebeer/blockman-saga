@@ -530,7 +530,6 @@ function takeDamage (input) {
         damage = input.damage;
         const objectIndex = fallingObjects.indexOf(input);
         if (objectIndex !== -1) {
-            input.element.remove();
             fallingObjects.splice(objectIndex, 1); // Remove the object from the array
         }
     } 
@@ -647,6 +646,7 @@ function gameLoop(currentTime) {
     updateDroneProjectiles();  // Move drone projectiles and check for collisions
     checkObjectCollisions();
     checkLaserCollisions();
+    renderObjects();           // Draw falling objects to the canvas
     // Check if all resources are collected
     if (areResourcesFull() && !isGameOver) {
         console.log("All resources collected! You win!");
@@ -687,33 +687,29 @@ function moveFallingObjects(deltaTime) {
     if (isGamePaused || isGameOver) {
         return;
     }
+    const maxX = objectsCanvas.width;
+    const maxY = objectsCanvas.height;
     for (let i = fallingObjects.length - 1; i >= 0; i--) {
-        if (isGamePaused) return;
         const object = fallingObjects[i];
-        const element = object.element; // The DOM element
-        const currentTop = parseFloat(element.style.top) || 0;
-        const currentLeft = parseFloat(element.style.left) || 0;
 
-        // Calculate new positions using frame rate-independent movement
-        const newTop = currentTop + (object.dropSpeed * 0.5) * deltaTime * 60;
-        const newLeft = currentLeft + (object.horizontalSpeed || 0) * deltaTime * 60;
+        // Frame-rate-independent movement on plain numbers (no DOM, no layout)
+        object.y += (object.dropSpeed * 0.5) * deltaTime * 60;
+        object.x += (object.horizontalSpeed || 0) * deltaTime * 60;
+        object.rot += object.rotSpeed * deltaTime;
 
-        // Bounce off screen edges
-        if (newLeft <= 0 || newLeft + element.offsetWidth >= gameContainer.offsetWidth) {
-            object.horizontalSpeed = -(object.horizontalSpeed || 0); // Reverse direction
+        // Bounce off the side edges
+        if (object.x <= 0 || object.x + object.w >= maxX) {
+            object.horizontalSpeed = -(object.horizontalSpeed || 0);
+            object.x = Math.max(0, Math.min(object.x, maxX - object.w));
         }
 
-        // Check if the object has left the screen
-        if (newTop > gameContainer.offsetHeight) {
-            element.remove(); // Remove from DOM
-            fallingObjects.splice(i, 1); // Remove from array
+        // Remove once it falls off the bottom
+        if (object.y > maxY) {
+            fallingObjects.splice(i, 1);
             if (object.isResource) {
                 perfectCatchStreak = 0; // Reset perfect catch streak
                 console.log("Resource missed! Perfect catch streak ruined!");
             }
-        } else {
-            element.style.top = `${newTop}px`; // Update vertical position
-            element.style.left = `${newLeft}px`; // Update horizontal position
         }
     }
 }
@@ -933,21 +929,25 @@ function fireLaser() {
 function checkObjectCollisions() {
     if (debugMode || isGameOver) return; // Skip collision logic in debug mode
     const playerRect = player.getBoundingClientRect();
+    // Objects live on the canvas in canvas-pixel coords; convert to viewport
+    // coords once via the canvas rect, then compare (same overlap test as before).
+    const c = objectsCanvas.getBoundingClientRect();
     //Prevents splicing at a bad spot in the index as items are removed
     for (let i = fallingObjects.length - 1; i >= 0; i--) {
         const object = fallingObjects[i];
-        const objectRect = object.element.getBoundingClientRect();
+        const left = c.left + object.x;
+        const top = c.top + object.y;
+        const right = left + object.w;
+        const bottom = top + object.h;
 
         if (
-            objectRect.left < playerRect.right &&
-            objectRect.right > playerRect.left &&
-            objectRect.top < playerRect.bottom &&
-            objectRect.bottom > playerRect.top
+            left < playerRect.right &&
+            right > playerRect.left &&
+            top < playerRect.bottom &&
+            bottom > playerRect.top
         ) {
-            
             if (object.isResource) {
                 collectResource(object.objectType); // Collect the resource
-                object.element.remove(); // Remove from DOM
                 fallingObjects.splice(i, 1); // Remove from array
             } else {
                 takeDamage(object);
@@ -980,16 +980,18 @@ function checkLaserCollisions() {
             }
             
         });
+        const c = objectsCanvas.getBoundingClientRect();
         fallingObjects.forEach((object, objectIndex) => {
             if (!object.isResource) {
             const laserRect = laser.element.getBoundingClientRect();
-            const objectRect = object.element.getBoundingClientRect();
+            const left = c.left + object.x;
+            const top = c.top + object.y;
 
             if (
-                laserRect.left < objectRect.right &&
-                laserRect.right > objectRect.left &&
-                laserRect.top < objectRect.bottom &&
-                laserRect.bottom > objectRect.top
+                laserRect.left < left + object.w &&
+                laserRect.right > left &&
+                laserRect.top < top + object.h &&
+                laserRect.bottom > top
             ) {
                 // Collision detected
                 handleLaserCollision(laser, object, laserIndex, objectIndex);
@@ -1030,7 +1032,6 @@ function createDroneExplosion(x, y) {
 function handleLaserCollision(laser, object, laserIndex, objectIndex) {
     createExplosion(object);
     laser.element.remove();
-    object.element.remove();
     lasers.splice(laserIndex, 1);
     fallingObjects.splice(objectIndex, 1);
     updateScore(10); // Change per difficulty level? Hazard type?
@@ -1057,13 +1058,9 @@ function createExplosion (object) {
     const explosion = document.createElement('div');
     explosion.classList.add('explosion');
 
-    // Get the object's position
-    const objectRect = object.element.getBoundingClientRect();
-    const gameContainer = document.getElementById('game-container');
-
-    // Position the explosion at the object's location
-    explosion.style.left = `${objectRect.left + objectRect.width / 2 - 25}px`;
-    explosion.style.top = `${objectRect.top + objectRect.height / 2 - 25}px`;
+    // Position the explosion at the object's location (canvas/container-local coords)
+    explosion.style.left = `${object.x + object.w / 2 - 25}px`;
+    explosion.style.top = `${object.y + object.h / 2 - 25}px`;
 
     // Add explosion to the game container
     gameContainer.appendChild(explosion);
@@ -1276,6 +1273,7 @@ function gameOver(reason) {
         pauseAnimations(true);
     });
     fallingObjects = []; // Clear the array
+    if (objectsCtx) objectsCtx.clearRect(0, 0, objectsCanvas.width, objectsCanvas.height);
     clearTimeout(fallingObjectTimeout);
     if (reason === "win") {
         playSound("illbeback");
@@ -1349,6 +1347,50 @@ const fireworkCanvas = document.getElementById('firework-canvas');
 const fireworkContext = fireworkCanvas.getContext('2d');
 fireworkCanvas.width = fireworkCanvas.offsetWidth;
 fireworkCanvas.height = fireworkCanvas.offsetHeight;
+
+// --- Falling-object canvas (replaces per-object DOM <img> elements) ----------
+// Objects are plain {x,y,w,h,...} data drawn here each frame, with AABB-math
+// collisions instead of getBoundingClientRect per object. This kills the layout
+// thrash that made the game choppy on mobile.
+const objectsCanvas = document.getElementById('objects-canvas');
+const objectsCtx = objectsCanvas.getContext('2d');
+
+function sizeObjectsCanvas() {
+    // Match the canvas buffer to its on-screen size (1:1 px), so object coords
+    // are canvas pixels and collisions line up.
+    objectsCanvas.width = objectsCanvas.clientWidth;
+    objectsCanvas.height = objectsCanvas.clientHeight;
+}
+sizeObjectsCanvas();
+window.addEventListener('resize', sizeObjectsCanvas);
+
+function loadSprite(name) { const img = new Image(); img.src = `imgs/${name}`; return img; }
+const objectSprites = {
+    fuel: loadSprite('crate-fuel.png'),
+    food: loadSprite('crate-food.png'),
+    supplies: loadSprite('crate-supplies.png'),
+    ketchup: loadSprite('ketchup.png'),
+    hazards: [loadSprite('fallingObject1.png'), loadSprite('fallingObject2.png'), loadSprite('fallingObject3.png')],
+};
+const OBJECT_SIZES = { food: [45, 45], fuel: [35, 35], supplies: [60, 60], hazard: [35, 25] };
+
+function renderObjects() {
+    if (!objectsCtx) return;
+    objectsCtx.clearRect(0, 0, objectsCanvas.width, objectsCanvas.height);
+    for (const o of fallingObjects) {
+        const img = o.img;
+        if (!img || !img.complete || img.naturalWidth === 0) continue;
+        if (o.rotSpeed) {
+            objectsCtx.save();
+            objectsCtx.translate(o.x + o.w / 2, o.y + o.h / 2);
+            objectsCtx.rotate(o.rot);
+            objectsCtx.drawImage(img, -o.w / 2, -o.h / 2, o.w, o.h);
+            objectsCtx.restore();
+        } else {
+            objectsCtx.drawImage(img, o.x, o.y, o.w, o.h);
+        }
+    }
+}
 
 function grandFinale(total){
     if(!total){
@@ -1586,55 +1628,44 @@ function spawnFallingObject() {
         // Default to hazard if no type is eligible
         randomObject = "hazard";
     }
-    const object = document.createElement('img');
-    object.alt = 'Object';
     const isResource = randomObject !== "hazard"; // Resources vs hazards
     // Set drop speed based on type
-    const dropSpeed = randomObject === "supplies" 
+    const dropSpeed = randomObject === "supplies"
         ? 2 * gameDifficulty
-        : (Math.ceil(Math.random() * 4 + 4))*gameDifficulty;
-    const damage = randomObject === "hazard" 
-    ? 5 * (gameDifficulty * 3)
-    : 0;
-    const horizontalSpeed = randomObject === "supplies" 
+        : (Math.ceil(Math.random() * 4 + 4)) * gameDifficulty;
+    const damage = randomObject === "hazard"
+        ? 5 * (gameDifficulty * 3)
+        : 0;
+    const horizontalSpeed = randomObject === "supplies"
         ? 0
-        : (Math.random() - 0.5) * 4 // Horizontal speed, random direction
+        : (Math.random() - 0.5) * 4; // Horizontal speed, random direction
 
-    //Set metadata and assign a model
-    object.dataset.objectType = randomObject;
-    object.classList.add(`falling-${randomObject}`);
-    if (isResource) {
-        object.src = `imgs/crate-${randomObject}.png`;
-    } else {
-        eazMode ? object.src = "imgs/ketchup.png" : object.src = `imgs/fallingObject${Math.ceil(Math.random() * 3)}.png`;
-    }
-    // Randomize animations
-    const animations = ['fall-rotate', 'fall-wiggle'];
-    if (randomObject === "supplies") {
-        object.classList.add('fall-wiggle');
-    } else {
-        const randomAnimation = animations[Math.floor(Math.random() * animations.length)];
-        object.classList.add(randomAnimation);
-    }
-    //Spawn in a random place
-    object.style.left = `${Math.random() * (gameContainer.offsetWidth - 50)}px`;
-    object.style.top = `0px`;
+    // Size + sprite for canvas rendering (no DOM element)
+    const [w, h] = OBJECT_SIZES[randomObject] || OBJECT_SIZES.hazard;
+    const img = isResource
+        ? objectSprites[randomObject]
+        : (eazMode ? objectSprites.ketchup : objectSprites.hazards[Math.floor(Math.random() * 3)]);
+    const spin = randomObject !== "supplies"; // hazards/fuel/food tumble as they fall
 
-    gameContainer.appendChild(object);
     playSound("buttonHover");
     // Track cooldown for the spawned type
     if (randomObject !== "hazard") {
         spawnCooldowns[randomObject] = currentTime; // Update the cooldown timer
     }
 
-    // Track the object and its interval
     fallingObjects.push({
-        element: object,
+        x: Math.random() * (objectsCanvas.width - w),
+        y: 0,
+        w,
+        h,
         horizontalSpeed,
         dropSpeed,
         isResource,
         damage,
         objectType: randomObject,
+        img,
+        rot: 0,
+        rotSpeed: spin ? (Math.random() * 2 - 1) * 4 : 0, // radians/sec
     });
 }
 
@@ -1649,6 +1680,7 @@ function pauseAnimations(pause = true) {
 function startGame() {
     isGameOn = true;
     document.body.classList.add('playing'); // reveal mobile touch controls
+    sizeObjectsCanvas();  // ensure the canvas buffer matches the current container size
     // Initialize lastTime before the game starts
     lastTime = performance.now();
     console.log*(`Music: ${musicOn}`);

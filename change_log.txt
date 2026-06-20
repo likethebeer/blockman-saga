@@ -1,5 +1,7 @@
 Blockman Change Log:
 
+00.07.04: Performance — falling objects (resources + hazards) now render on a <canvas> with numeric positions and math-based collisions, instead of per-object DOM elements + getBoundingClientRect every frame. Removes the layout thrash that made the game choppy, especially on mobile.
+
 00.07.03: Mobile polish — touch controls moved to a dedicated bottom deck so they no longer cover the play field; removed backdrop-filter blur from the buttons for smoother performance.
 
 00.07.02: Mobile scaling — added viewport meta tag and scale-to-fit so the fixed-size game fits any screen. Desktop unchanged (never upscales).

@@ -37,6 +37,17 @@ body {
     pointer-events: none; /* Allows clicks to pass through to underlying elements */
   }
 
+/* Falling objects (resources + hazards) are drawn here instead of as DOM <img>
+   elements — see main.js. This removes per-frame layout thrash on mobile. */
+#objects-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
 #agreement {
     position: absolute;
     top: 5%;
