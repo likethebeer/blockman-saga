@@ -1,5 +1,7 @@
 Blockman Change Log:
 
+00.07.02: Mobile scaling — added viewport meta tag and scale-to-fit so the fixed-size game fits any screen. Desktop unchanged (never upscales).
+
 00.07.01: Added mobile/tablet touch controls (move, boost, fire, pause) and tap-to-start. Desktop keyboard play unchanged.
 
 00.06.02: Added drone attack.

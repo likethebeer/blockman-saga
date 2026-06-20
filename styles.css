@@ -5,6 +5,17 @@
 body {
     font-family: "Iceberg", sans-serif;
     background-color: rgb(32, 0, 36);
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* The game is a fixed 650x700 layout; scale.js shrinks it to fit small screens. */
+#raingame {
+    transform-origin: center center;
 }
 
 /* #raingame maintains Flexbox and positioning */
