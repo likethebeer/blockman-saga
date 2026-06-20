@@ -1252,19 +1252,20 @@ body.touch-enabled.playing #touch-controls {
         border-top: 2px solid rgba(255, 255, 255, 0.15);
     }
     #touch-controls .touch-btn { width: 62px; height: 62px; bottom: 26px; top: auto; }
-    #touch-left  { left: 6%; }
-    #touch-right { left: calc(6% + 74px); }
-    #touch-fire  { right: calc(6% + 74px); }
-    #touch-boost { right: 6%; }
+    /* Move arrows on the far edges (natural thumb rest); actions grouped center */
+    #touch-left  { left: 5%;  right: auto; }
+    #touch-right { right: 5%; left: auto; }
+    #touch-fire  { left: calc(50% - 96px); right: auto; }
     #touch-pause {
         position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
+        left: calc(50% - 24px);
+        right: auto;
+        transform: none;
         bottom: 32px;
         top: auto;
-        right: auto;
         width: 48px;
         height: 48px;
         font-size: 14px;
     }
+    #touch-boost { left: calc(50% + 34px); right: auto; }
 }
