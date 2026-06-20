@@ -1120,3 +1120,61 @@ button {
     flex-direction: row;
     justify-content: space-between;
 }
+/* =========================================================
+   Touch controls (mobile / tablet)
+   Hidden on desktop and on the menus; shown only while a game
+   is in progress (body.playing, set in startGame / cleared in
+   gameOver). z-index sits below the pause + game-over overlays
+   (500/900) so those screens cover the buttons, but above the
+   play field. Buttons re-enable pointer events; the container
+   itself passes touches through.
+   ========================================================= */
+#touch-controls { display: none; }
+
+body.touch-enabled.playing #touch-controls {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 450;
+    pointer-events: none;
+}
+
+#touch-controls .touch-btn {
+    position: absolute;
+    pointer-events: auto;
+    width: 66px;
+    height: 66px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.55);
+    background: rgba(0, 0, 0, 0.32);
+    color: #fff;
+    font-size: 26px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    backdrop-filter: blur(2px);
+    transition: transform 0.05s ease, background 0.05s ease;
+}
+
+#touch-controls .touch-btn.pressed {
+    background: rgba(255, 255, 255, 0.38);
+    transform: scale(0.9);
+}
+
+#touch-left  { left: 18px;  bottom: 22px; }
+#touch-right { left: 96px;  bottom: 22px; }
+#touch-fire  { right: 96px; bottom: 22px; }
+#touch-boost { right: 18px; bottom: 22px; }
+#touch-pause {
+    top: 12px;
+    right: 12px;
+    width: 46px;
+    height: 46px;
+    font-size: 16px;
+    letter-spacing: -2px;
+}

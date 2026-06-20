@@ -179,7 +179,7 @@
                     </ul>
                     <p>Any rights not covered here are reserved for future use by the author.</p>
                     <p>© Mike Olson, 2024</p>
-                    <h4>Version: <span id="game-version">0.06.02</span></h4>
+                    <h4>Version: <span id="game-version">0.07.01</span></h4>
                 </div>
                 <div class="overlay" id="game-paused" style="text-align: center; padding-top: 300px;">    
                     Game Paused!
@@ -188,6 +188,13 @@
                 <div class="overlay" id="game-over" style="text-align: center; padding-top: 300px;">    
                     <span id=gameOverReason>Game Over!</span>
                     <button id="restart" style="display: block; margin: 20px auto; padding: 10px 20px; font-size: 16px;">Restart</button>
+                </div>
+                <div id="touch-controls" aria-hidden="true">
+                    <button id="touch-left"  class="touch-btn" type="button" aria-label="Move left">&#9664;</button>
+                    <button id="touch-right" class="touch-btn" type="button" aria-label="Move right">&#9654;</button>
+                    <button id="touch-fire"  class="touch-btn" type="button" aria-label="Fire laser">&#128293;</button>
+                    <button id="touch-boost" class="touch-btn" type="button" aria-label="Boost">&#128640;</button>
+                    <button id="touch-pause" class="touch-btn" type="button" aria-label="Pause">&#10073;&#10073;</button>
                 </div>
             </div>
         </div>
@@ -266,5 +273,6 @@
     <script src="audio.js"></script> 
     <script src="boost.js"></script>
     <script src="main.js"></script>
+    <script src="touch-controls.js"></script>
 </body>
 </html>

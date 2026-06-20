@@ -459,6 +459,22 @@ restartButton.addEventListener('click', () => {
     location.reload(); // Restart game logic
 });
 
+// Begin the game from the title screen.
+// Extracted so both the Enter key and a mobile tap can trigger the same flow.
+function beginGameFromTitle() {
+    if (!userAgreed || isGameOver || isGameOn || enterDisabled) return;
+    enterDisabled = true;
+    fadeAudio(menuTheme);
+    setTimeout(() => musicOn && bgMusic.play(), 500);
+    showOverlay("title", false);
+    updateScoreDisplay();
+    setPlayerModel(selectedCharacter + "-model.gif");
+    startCountdown(() => {
+        console.log("Game starts now!");
+        startGame();
+    });
+}
+
 // Handle keyboard controls
 //Start game from title screen
 document.addEventListener('keydown', (event) => {
@@ -471,17 +487,8 @@ document.addEventListener('keydown', (event) => {
         showOverlay("test");
         }
     if (event.key === 'Enter' && userAgreed && !isGameOver && !isGameOn && !enterDisabled) {
-        enterDisabled = true;
         event.preventDefault(); // Prevent scrolling
-        fadeAudio(menuTheme)
-        setTimeout(() => musicOn && bgMusic.play(), 500);
-        showOverlay("title",false);
-        updateScoreDisplay();
-        setPlayerModel(selectedCharacter + "-model.gif")
-        startCountdown(() => {
-            console.log("Game starts now!");
-            startGame(); // Replace with your game's start logic
-        });
+        beginGameFromTitle();
         }
 });
 // Toggle manual pause/resume
@@ -1260,6 +1267,7 @@ function showNameInputModal(playerScore) {
 // Handle game over
 function gameOver(reason) {
     isGameOver = true;
+    document.body.classList.remove('playing'); // hide mobile touch controls
     fadeAudio(bgMusic);
     showOverlay("gameOver",true)
     // Stop all falling objects
@@ -1640,6 +1648,7 @@ function pauseAnimations(pause = true) {
 // Wrap spawn logic in a function to allow restarting
 function startGame() {
     isGameOn = true;
+    document.body.classList.add('playing'); // reveal mobile touch controls
     // Initialize lastTime before the game starts
     lastTime = performance.now();
     console.log*(`Music: ${musicOn}`);
