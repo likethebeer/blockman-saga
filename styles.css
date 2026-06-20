@@ -1157,7 +1157,7 @@ body.touch-enabled.playing #touch-controls {
     height: 66px;
     border-radius: 50%;
     border: 2px solid rgba(255, 255, 255, 0.55);
-    background: rgba(0, 0, 0, 0.32);
+    background: rgba(0, 0, 0, 0.5);
     color: #fff;
     font-size: 26px;
     line-height: 1;
@@ -1168,7 +1168,8 @@ body.touch-enabled.playing #touch-controls {
     user-select: none;
     -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
-    backdrop-filter: blur(2px);
+    /* No backdrop-filter: re-blurring the animating play field every frame is a
+       major source of jank on mobile. Solid-ish background reads fine instead. */
     transition: transform 0.05s ease, background 0.05s ease;
 }
 
@@ -1238,4 +1239,32 @@ body.touch-enabled.playing #touch-controls {
     .resource-tracker p { width: auto; font-size: 10px; padding-left: 2px; }
     .combo-text { font-size: .58rem; }
     #timer-section, #combo-header, #time-left-header { font-size: .65rem; }
+
+    /* Touch controls get a dedicated bottom deck so they never cover the play
+       field (where Blockman sits and moves). Reserve space for it during play. */
+    body.touch-enabled.playing #raingame { padding-bottom: 112px; }
+    body.touch-enabled.playing #touch-controls {
+        position: fixed;
+        inset: auto 0 0 0;
+        height: 112px;
+        z-index: 460;
+        background: rgba(0, 0, 0, 0.5);
+        border-top: 2px solid rgba(255, 255, 255, 0.15);
+    }
+    #touch-controls .touch-btn { width: 62px; height: 62px; bottom: 26px; top: auto; }
+    #touch-left  { left: 6%; }
+    #touch-right { left: calc(6% + 74px); }
+    #touch-fire  { right: calc(6% + 74px); }
+    #touch-boost { right: 6%; }
+    #touch-pause {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 32px;
+        top: auto;
+        right: auto;
+        width: 48px;
+        height: 48px;
+        font-size: 14px;
+    }
 }
